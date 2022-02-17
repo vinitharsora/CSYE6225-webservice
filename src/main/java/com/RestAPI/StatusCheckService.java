@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Service
 public class StatusCheckService {
 
-	@GetMapping("/getstatus")
+	@GetMapping("/healthz")
 	public ResponseEntity<String> Hello() {
 		
 		return ResponseEntity.ok()
