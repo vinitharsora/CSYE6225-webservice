@@ -6,6 +6,7 @@ const auth = require('basic-auth');
 const moment = require('moment');
 const { check } = require('express-validator');
 const { decodeBase64 } = require("bcryptjs");
+const e = require("express");
 
 
 const connection = mysql.createConnection({
@@ -43,23 +44,49 @@ let loginValidation = [
   check('password', 'Password must be 8 or more characters').isLength({ min: 8 })
 ];
 
+// Helper function to validate user
+
+const validateUser = (user) => {
+
+    // Validate username to database user
+
+    let res;
+  
+    connection.query('SELECT username, password FROM users where username=?', user.name, function (error, results) {
+      if (results.length != 0) {
+        // decrypt the hash
+        bcrypt.compare(user.pass, results[0]['password'], (bErr, bResult) => {
+          if (bResult) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+      } else {
+        return false;
+      }
+    });
+}
+
 // First API Get Request
 
 app.get('/healthz', (req, res) => {
   const user = auth(req);
 
-  // Validate user
-
-  connection.query(`SELECT * FROM users WHERE username = ${connection.escape(user.name)};`, (err, result) => {
-    console.log(result);
-    if (result == []) { 
-      return res.status(404);
+  connection.query('SELECT username, password FROM users where username=?', user.name, function (error, results) {
+    if (results.length != 0) {
+      // decrypt the hash
+      bcrypt.compare(user.pass, results[0]['password'], (bErr, bResult) => {
+        if (bResult) {
+          res.status(200).send('It is healthy!');
+        } else {
+          res.status(401).send('Incorrect Password!');
+        }
+      });
+    } else {
+      res.status(401).send('Incorrect Username!');
     }
   });
-
-
-  // console.log(user.pass);
-  // res.send('It is healthy!');
 });
 
 // API Request to create new user with hashed password
@@ -137,45 +164,84 @@ app.put('/v1/user/self', loginValidation, (req, res, next) => {
 
   const user = auth(req);
 
-  connection.query(`SELECT * FROM users WHERE username = ${connection.escape(user.name)};`, (err, result) => {
-    if (err) {
-      throw err;
-      return res.status(400).send({msg: err});
-    }
-
-    if (!result.length) {
-      return res.status(401).send({msg: 'Email or password is incorrect!'});
-    }
-
-    // check password
-    bcrypt.compare(user.pass, result[0]['password'], (bErr, bResult) => {
-      if (req.body.first_name != result[0].first_name) {
-        connection.query(`UPDATE users SET first_name = '${req.body.first_name}', account_updated = '${moment(new Date()).format('YYYY-MM-DD hh:mm:ss')}'  WHERE username = '${result[0].username}'`);
-        return res.status(201).send({msg: 'The first_name has been updated!'});
-      } else if (req.body.last_name != result[0].last_name) {
-        connection.query(`UPDATE users SET last_name = '${req.body.last_name}', account_updated = '${moment(new Date()).format('YYYY-MM-DD hh:mm:ss')}'  WHERE username = '${result[0].username}'`);
-        return res.status(201).send({msg: 'The last_name has been updated!'});
-      } else if (req.body.newpassword == req.body.confirmnewpassword) {
-          bcrypt.hash(req.body.newpassword, 10, (err, hash) => {
-          if (err) { 
-            return res.status(500).send({msg: err});
+  connection.query('SELECT first_name, last_name, username, password FROM users where username=?', user.name, function (error, results) {
+    if (results.length != 0) {
+      // decrypt the hash
+      bcrypt.compare(user.pass, results[0]['password'], (bErr, bResult) => {
+        if (bResult) {
+          if (req.body.first_name != results[0].first_name) {
+            connection.query(`UPDATE users SET first_name = '${req.body.first_name}', account_updated = '${moment(new Date()).format('YYYY-MM-DD hh:mm:ss')}'  WHERE username = '${results[0].username}'`);
+            return res.status(201).send({msg: 'The first_name has been updated!'});
+          } else if (req.body.last_name != results[0].last_name) {
+            connection.query(`UPDATE users SET last_name = '${req.body.last_name}', account_updated = '${moment(new Date()).format('YYYY-MM-DD hh:mm:ss')}'  WHERE username = '${results[0].username}'`);
+            return res.status(201).send({msg: 'The last_name has been updated!'});
+          } else if (req.body.newpassword == req.body.confirmnewpassword) {
+              bcrypt.hash(req.body.newpassword, 10, (err, hash) => {
+              if (err) { 
+                return res.status(500).send({msg: err});
+              } else {
+                // new hashed pw => add to database
+                connection.query(`UPDATE users SET password = '${hash}', account_updated = '${moment(new Date()).format('YYYY-MM-DD hh:mm:ss')}' WHERE username = '${results[0].username}'`,
+                  (err, result) => {
+                      if (err) {
+                      throw err;
+                      return res.status(400).send({msg: err});
+                  }
+                  return res.status(201).send({msg: 'The password has been updated!'});
+                  });
+                }
+            });
           } else {
-            // new hashed pw => add to database
-            connection.query(`UPDATE users SET password = '${hash}', account_updated = '${moment(new Date()).format('YYYY-MM-DD hh:mm:ss')}' WHERE username = '${result[0].username}'`,
-              (err, result) => {
-                  if (err) {
-                  throw err;
-                  return res.status(400).send({msg: err});
-              }
-              return res.status(201).send({msg: 'The password has been updated!'});
-              });
-            }
-        });
-      } else {
-        return res.status(400).send({msg: "Something went wrong!"});
-      }
-    });
+            return res.status(400).send({msg: "Something went wrong!"});
+          }
+        } else {
+          res.status(401).send('Incorrect Password!');
+        }
+      });
+    } else {
+      res.status(401).send('Incorrect Username!');
+    }
   });
+
+  // connection.query(`SELECT * FROM users WHERE username = ${connection.escape(user.name)};`, (err, result) => {
+  //   if (err) {
+  //     throw err;
+  //     return res.status(400).send({msg: err});
+  //   }
+
+  //   if (!result.length) {
+  //     return res.status(401).send({msg: 'Email or password is incorrect!'});
+  //   }
+
+  //   // check password
+  //   bcrypt.compare(user.pass, result[0]['password'], (bErr, bResult) => {
+  //     if (req.body.first_name != result[0].first_name) {
+  //       connection.query(`UPDATE users SET first_name = '${req.body.first_name}', account_updated = '${moment(new Date()).format('YYYY-MM-DD hh:mm:ss')}'  WHERE username = '${result[0].username}'`);
+  //       return res.status(201).send({msg: 'The first_name has been updated!'});
+  //     } else if (req.body.last_name != result[0].last_name) {
+  //       connection.query(`UPDATE users SET last_name = '${req.body.last_name}', account_updated = '${moment(new Date()).format('YYYY-MM-DD hh:mm:ss')}'  WHERE username = '${result[0].username}'`);
+  //       return res.status(201).send({msg: 'The last_name has been updated!'});
+  //     } else if (req.body.newpassword == req.body.confirmnewpassword) {
+  //         bcrypt.hash(req.body.newpassword, 10, (err, hash) => {
+  //         if (err) { 
+  //           return res.status(500).send({msg: err});
+  //         } else {
+  //           // new hashed pw => add to database
+  //           connection.query(`UPDATE users SET password = '${hash}', account_updated = '${moment(new Date()).format('YYYY-MM-DD hh:mm:ss')}' WHERE username = '${result[0].username}'`,
+  //             (err, result) => {
+  //                 if (err) {
+  //                 throw err;
+  //                 return res.status(400).send({msg: err});
+  //             }
+  //             return res.status(201).send({msg: 'The password has been updated!'});
+  //             });
+  //           }
+  //       });
+  //     } else {
+  //       return res.status(400).send({msg: "Something went wrong!"});
+  //     }
+  //   });
+  // });
 });
 
 // GET User Information
@@ -183,17 +249,30 @@ app.put('/v1/user/self', loginValidation, (req, res, next) => {
 app.post('/v1/user/self', signupValidation, (req, res, next) => {
 
   const user = auth(req);
-  
-  connection.query('SELECT username, first_name, last_name, account_created, account_updated FROM users where username=?', user.name, function (error, results, fields) {
 
-    if (error) throw error;
-      return res.send({ error: false, data: results[0], message: 'Fetch Successfully.' });
+  connection.query('SELECT username, password FROM users where username=?', user.name, function (error, results) {
+    if (results.length != 0) {
+      // decrypt the hash
+      bcrypt.compare(user.pass, results[0]['password'], (bErr, bResult) => {
+        if (bResult) {
+          connection.query('SELECT id, username, first_name, last_name, account_created, account_updated FROM users where username=?', user.name, function (error, resultsMain, fields) {
+
+            if (error) throw error;
+              return res.status(200).send(resultsMain[0]);
+            }
+        
+          );
+        } else {
+          res.status(401).send('Incorrect Password!');
+        }
+      });
+    } else {
+      res.status(401).send('Incorrect Username!');
     }
-
-  );
+  });   
 });
 
-// Listen on Port 8080
+// Listen on Port 8081
 
 const PORT = process.env.PORT || 8081;
 
