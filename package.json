@@ -15,11 +15,10 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.17.2",
-  
     "express-validator": "^6.14.0",
- 
     "moment": "^2.29.1",
     "mysql": "^2.18.1",
-    "sequelize": "^6.16.1"
+    "sequelize": "^6.16.1",
+    "uuid": "^8.3.2"
   }
 }
