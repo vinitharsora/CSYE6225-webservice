@@ -8,7 +8,7 @@ POST - http://localhost:8081/v1/user/
 
 PUT - http://localhost:8081/v1/user/self/
 
-POST - http://localhost:8081/v1/user/self
+GET - http://localhost:8081/v1/user/self
 
 Responds with following HTTP messages
 
@@ -21,6 +21,8 @@ Responds with following HTTP messages
 "200 OK - The request succeeded."
 
 "401 Unauthorized - Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response."
+
+"204 No Content - The HTTP 204 No Content success status response code indicates that a request has succeeded, but that the client doesn't need to navigate away from its current page."
 
 # What you Need 
 
@@ -53,9 +55,9 @@ http://localhost:8081/healthz/, where you should see: "200 OK".
 
 http://localhost:8081/v1/user/ where you should see: "201 Created".
 
-http://localhost:8081/v1/user/self/ where you should see: "201 Created".
+http://localhost:8081/v1/user/self/ where you should see: "204 No Content".
 
-http://localhost:8081/v1/user/self where you should use: "200 OK".
+http://localhost:8081/v1/user/self where you should use: "204 No Content".
 
 # Important Commands
 
