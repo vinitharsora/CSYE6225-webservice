@@ -1,9 +1,4 @@
 {
-  "variables": {
-    "aws_access_key": "",
-    "aws_secret_key": "",
-    "ssh_username": ""
-  },
   "builders": [
     {
       "type": "amazon-ebs",
@@ -12,9 +7,10 @@
       "region": "us-east-1",
       "source_ami": "ami-0c293f3f676ec4f90",
       "instance_type": "t2.micro",
-      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_username": "ec2-user",
       "ami_name": "csye6225_{{timestamp}}",
-      "ami_description": "Linux AMI for CSYE_6225",
+      "ami_users": "876375802417",
+      "ami_description": "Amazon Linux 2 AMI for CSYE_6225",
       "launch_block_device_mappings": [
         {
           "device_name": "/dev/xvda",
@@ -31,14 +27,12 @@
   "provisioners": [
     {
       "type": "shell",
-      "inline": [
-        "mkdir /tmp/webapp"
-      ]
+      "inline": [ "mkdir /tmp/webservice" ]
     },
     {
       "type": "file",
-      "source": "../test/",
-      "destination": "/tmp/"
+      "source": "./",
+      "destination": "/tmp/webservice/"
     },
     {
       "type": "shell",
@@ -49,7 +43,7 @@
         "sudo yum install mysql-community-server -y",
         "sudo systemctl start mysqld.service",
         "pwd=`sudo grep 'temporary password' /var/log/mysqld.log | rev | cut -d':' -f 1 | rev | xargs`",
-        "sudo mysql -uroot -p$pwd --connect-expired-password -e \"Alter user 'root'@'localhost' IDENTIFIED BY 'Qwerty@12345!';\"",
+        "sudo mysql -uroot -p$pwd --connect-expired-password -e \"Alter user 'root'@'localhost' IDENTIFIED BY 'Qwerty@123!';\"",
         "sleep 10",
         "echo Install Node.js",
         "sudo curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash",
@@ -57,7 +51,7 @@
         "nvm install node",
         "node --version",
         "mkdir -p ~/webservice",
-        "mv /tmp/webapp/* ~/webservice/",
+        "mv /tmp/webservice/* ~/webservice/",
         "cd ~/webservice",
         "pwd",
         "npm install"
