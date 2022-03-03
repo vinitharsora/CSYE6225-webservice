@@ -24,7 +24,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        c
+        ache-dependency-path: subdir/package-lock.json
     - name: running ci command
       working-directory: test/webapp
       run: npm ci
