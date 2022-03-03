@@ -9,7 +9,7 @@
       "instance_type": "t2.micro",
       "ssh_username": "ec2-user",
       "ami_name": "csye6225_{{timestamp}}",
-      "ami_users": "876375802417",
+      "ami_users": "981331903688",
       "ami_description": "Amazon Linux 2 AMI for CSYE_6225",
       "launch_block_device_mappings": [
         {
