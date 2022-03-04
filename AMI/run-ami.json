@@ -1,0 +1,56 @@
+
+{
+    "variables": {
+        "AWS_ACCESS_KEY": "",
+        "AWS_SECRET_KEY": "",
+        "ssh_username": "ec2-user"
+    },
+    "builders": [{
+        "type": "amazon-ebs",
+        "access_key": "{{user `AWS_ACCESS_KEY`}}",
+        "secret_key": "{{user `AWS_SECRET_KEY`}}",
+        "region": "us-east-1",
+        "source_ami": "ami-0c293f3f676ec4f90",
+        "instance_type": "t2.micro",
+        "ssh_username": "{{user `ssh_username`}}",
+        "ami_name": "csye6225_{{timestamp}}",
+        "ami_users": "981331903688",
+        "ami_description": "Linux AMI for CSYE_6225",
+        
+        "tags": {
+            "Name": "csye6225 - {{timestamp}}"
+        }
+    }],
+    "provisioners": [{
+        "type": "file",
+        "source": "../test/",
+        "destination": "/tmp/"
+    },
+    {
+        "type": "shell",
+        "inline": [
+            "sudo yum update -y",
+            "sudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022",
+            "sudo rpm -Uvh https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm",
+            "sudo yum install mysql-community-server -y",
+            "sudo systemctl start mysqld.service",
+            "pwd=`sudo grep 'temporary password' /var/log/mysqld.log | rev | cut -d':' -f 1 | rev | xargs`",
+            "sudo mysql -uroot -p$pwd --connect-expired-password -e \"Alter user 'root'@'localhost' IDENTIFIED BY 'Qwerty@12345!';\"",
+            "sleep 10",
+            "echo Install Node.js",
+            "sudo curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash",
+            ". ~/.nvm/nvm.sh",
+            "nvm install node",
+            "node --version",
+            "mkdir -p ~/webservice",
+            "pwd",
+            "ls",
+            "mv /tmp/API-test1/* ~/webservice/",
+            "cd ~/webservice",
+            "pwd",
+            "npm install"
+        ]
+    }
+]
+   
+}
