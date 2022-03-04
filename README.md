@@ -1,66 +1,48 @@
-# Building a RESTful Web Service
+# webservice
 
-Built a service that will accept following HTTP request at 
+A Node.Js app which returns status code 200 on calling of /healthz.
 
-GET - http://localhost:8081/healthz/
+---
+## Requirements
 
-POST - http://localhost:8081/v1/user/
+For development, you will need Node.js and npm installed in your environement.
 
-PUT - http://localhost:8081/v1/user/self/
+### Node
+- #### Node installation
 
-GET - http://localhost:8081/v1/user/self
+  You can install nodejs and npm easily with apt install, just run the following commands.
 
-Responds with following HTTP messages
+      $ sudo apt install nodejs
+      $ sudo apt install npm
 
-"400 Bad Request - The server could not understand the request due to invalid syntax."
+- #### Other Operating Systems
+  You can find more information about the installation on the [official Node.js website](https://nodejs.org/) and the [official NPM website](https://npmjs.org/).
 
-"500 Internal Server Error - The server has encountered a situation it does not know how to handle."
+If the installation was successful, you should be able to run the following command.
 
-"201 Created - The request succeeded, and a new resource was created as a result. This is typically the response sent after POST requests, or some PUT requests"
+    $ node --version
+    v17.3.0
 
-"200 OK - The request succeeded."
+    $ npm --version
+    8.3.0
 
-"401 Unauthorized - Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response."
+###
+### Yarn installation (optional)
+  After installing node, this project will need yarn too, so just run the following command.
 
-"204 No Content - The HTTP 204 No Content success status response code indicates that a request has succeeded, but that the client doesn't need to navigate away from its current page."
+      $ npm install -g yarn
 
-# What you Need 
+---
 
-* A favorite text editor or IDE (VScode)
+## Build & Install
 
-* POSTMAN
+    $ git clone git@github.com:spring2022-CloudComputing/webservice.git
+    $ cd cd webwebservice/API-test1
+    $ npm install
+## Running the project
 
-* MySQL
+    $ npm run start:server
 
-* npm 8.5.0
+## Running Unit Test cases
 
-* JavaScript
-
-# Instructions:
-
-Step 1: Download and unzip the source repository for this guide, or clone it using Git.
-
-Step 2: Create appropriate files in the IDE and write the code to test the API call in Postman.
-
-Step 3: Open Postman and Test the API's
-
-Step 4: Check the Database after each and every API is called to see the status in Database. 
-
-
-# Test the Service
-
-To check the service is up visit 
-
-http://localhost:8081/healthz/, where you should see: "200 OK".
-
-http://localhost:8081/v1/user/ where you should see: "201 Created".
-
-http://localhost:8081/v1/user/self/ where you should see: "204 No Content".
-
-http://localhost:8081/v1/user/self where you should use: "204 No Content".
-
-# Important Commands
-
-brew install mysql
-
-nodemon server.js 
+    $ npm test
