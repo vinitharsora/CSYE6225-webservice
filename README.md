@@ -8,7 +8,7 @@ A Node.Js app which returns status code 200 on calling of /healthz.
 For development, you will need Node.js and npm installed in your environement.
 
 ### Node
-- #### Node installation
+- ### Node installation
 
   You can install nodejs and npm easily with apt install, just run the following commands.
 
