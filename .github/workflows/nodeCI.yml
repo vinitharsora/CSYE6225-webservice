@@ -49,6 +49,7 @@ jobs:
       
     - name: running tests
       working-directory: test/API-test1
-      run: npm test
+      run: npm install
+      
 
     
