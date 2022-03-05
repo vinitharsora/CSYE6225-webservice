@@ -1,0 +1,83 @@
+{
+    "variables": {
+        "AWS_ACCESS_KEY": "",
+        "AWS_SECRET_KEY": "",
+        "aws_region": "us-east-1",
+        "subnet_id": "subnet-06aa189b0e9d7ec2a",
+        "source_ami": "ami-0c293f3f676ec4f90",
+        "ssh_username": "ec2-user"
+    },
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "profile": "dev",
+            "access_key": "{{user `AWS_ACCESS_KEY`}}",
+            "secret_key": "{{user `AWS_SECRET_KEY`}}",
+            "region": "{{user `aws_region`}}",
+            "instance_type": "t2.micro",
+            "subnet_id": "{{user `subnet_id`}}",
+            "source_ami": "{{user `source_ami`}}",
+            "ssh_username": "{{user `ssh_username`}}",
+            "ami_name": "csye6225_{{timestamp}}",
+            "ami_description": "Linux 2 AMI for csye6225",
+            "ami_users": [
+                "981331903688"
+            ],
+            "ami_block_device_mappings": [
+                {
+                    "delete_on_termination": true,
+                    "device_name": "/dev/xvda",
+                    "volume_size": 60,
+                    "volume_type": "gp2"
+                }
+            ],
+            "tags": {
+                "Tool": "Packer",
+                "Author": "user",
+                "Environment": "dev"
+            }
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "environment_vars": [
+                "FOO=foo"
+            ],
+            "script": "provisioners.sh"
+        },
+        {
+            "type": "file",
+            "source": "../",
+            "destination": "/home/ec2-user/node-app"
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "cd /home/ec2-user/node-app",
+                "sudo npm install",
+                "sudo pm2 start index.js",
+                "sudo pm2 startup systemd",
+                "sudo pm2 save",
+                "sudo ln -s /home/ec2-user/node-app/webapp.service /etc/systemd/system/webapp.service",
+                "sudo systemctl daemon-reload",
+                "sudo systemctl enable webapp.service",
+                "sudo systemctl start webapp.service"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "sudo yum -y install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm",
+                "echo 'Install community server'",
+                "sudo yum -y install mysql-community-server",
+                "sudo systemctl enable --now mysqld",
+                "systemctl status mysqld",
+                "pwd=`sudo grep 'temporary password' /var/log/mysqld.log | rev | cut -d':' -f 1 | rev | xargs`",
+                "sudo mysql -uroot -p$pwd --connect-expired-password -e \"Alter user 'root'@'localhost' IDENTIFIED BY 'Qwerty@12345!';\"",
+                "mysql -u root -pQwerty@12345! -e \"CREATE DATABASE IF NOT EXISTS usersDB;\"",
+                "sleep 10"
+            ]
+        }
+    ]
+}
