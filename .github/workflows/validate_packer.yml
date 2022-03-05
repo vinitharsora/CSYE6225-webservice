@@ -1,0 +1,26 @@
+name: Packer Validation
+
+env:
+  CI: true
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+  ssh_username: "ec2-user"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  packer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build Packer Template
+        uses: ExitoLab/packer_build_action_aws@v0.2.10
+        with:
+          templateFile: "ami.json"
+          workingDir: "packer"

@@ -1,48 +1,29 @@
 # webservice
+CSYE6225 Workspace
 
-A Node.Js app which returns status code 200 on calling of /healthz.
+# Assignment-4
 
----
-## Requirements
+Pre-requisites:
+- Install Node.js 
 
-For development, you will need Node.js and npm installed in your environement.
+Getting Started:
+- Clone the repository
+    - git clone https://github.com/Amal-Mat/webservice.git
 
-### Node
-- ### Node installation
+- Install Dependencies
+    - cd webservice
+    - npm install
 
-  You can install nodejs and npm easily with apt install, just run the following commands.
 
-      $ sudo apt install nodejs
-      $ sudo apt install npm
+- Build and run the project
+    - npm start
 
-- #### Other Operating Systems
-  You can find more information about the installation on the [official Node.js website](https://nodejs.org/) and the [official NPM website](https://npmjs.org/).
+Testing:
+- The test case is written using Mocha and Supertest -
 
-If the installation was successful, you should be able to run the following command.
+    - "mocha": "^9.2.0",
+    - "supertest": "^6.2.2"
 
-    $ node --version
-    v17.3.0
-
-    $ npm --version
-    8.3.0
-
-###
-### Yarn installation (optional)
-  After installing node, this project will need yarn too, so just run the following command.
-
-      $ npm install -g yarn
-
----
-
-## Build & Install
-
-    $ git clone git@github.com:spring2022-CloudComputing/webservice.git
-    $ cd cd webwebservice/API-test1
-    $ npm install
-## Running the project
-
-    $ npm run start:server
-
-## Running Unit Test cases
-
-    $ npm test
+- Running tests using NPM Scripts
+    - npm run test
+  
