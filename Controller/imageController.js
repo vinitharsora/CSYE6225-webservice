@@ -58,7 +58,7 @@ async function updateUserPic(req, res, next) {
         res.status(400).send({
             message: 'Unsupported File Type'
         });
-        logger.error("Unsupported File Format..!");
+        console.log("Unsupported File Format..!");
 
     } else {
 
