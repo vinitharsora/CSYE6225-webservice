@@ -68,14 +68,6 @@
         {
             "type": "shell",
             "inline": [
-                "sudo yum -y install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm",
-                "echo 'Install community server'",
-                "sudo yum -y install mysql-community-server",
-                "sudo systemctl enable --now mysqld",
-                "systemctl status mysqld",
-                "pwd=`sudo grep 'temporary password' /var/log/mysqld.log | rev | cut -d':' -f 1 | rev | xargs`",
-                "sudo mysql -uroot -p$pwd --connect-expired-password -e \"Alter user 'root'@'localhost' IDENTIFIED BY 'Qwerty@12345!';\"",
-                "mysql -u root -pQwerty@12345! -e \"CREATE DATABASE IF NOT EXISTS usersDB;\"",
                 "sleep 10"               
             ]
         }
