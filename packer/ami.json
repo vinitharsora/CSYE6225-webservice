@@ -68,7 +68,7 @@
         {
             "type": "shell",
             "inline": [
-                "sleep 10"               
+                "sleep 10"
             ]
         }
     ]
