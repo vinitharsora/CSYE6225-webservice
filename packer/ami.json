@@ -1,7 +1,7 @@
 {
     "variables": {
         "AWS_ACCESS_KEY": "",
-        "AWS_SECRET_KEY": "",
+        "AWS_SECRET_ACCESS": "",
         "aws_region": "us-east-1",
         "subnet_id": "subnet-06aa189b0e9d7ec2a",
         "source_ami": "ami-0c293f3f676ec4f90",
@@ -12,7 +12,7 @@
             "type": "amazon-ebs",
             "profile": "dev",
             "access_key": "{{user `AWS_ACCESS_KEY`}}",
-            "secret_key": "{{user `AWS_SECRET_KEY`}}",
+            "secret_key": "{{user `AWS_SECRET_ACCESS`}}",
             "region": "{{user `aws_region`}}",
             "instance_type": "t2.micro",
             "subnet_id": "{{user `subnet_id`}}",

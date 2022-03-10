@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const baseAuthentication = require('../util/auth.js');
 const userController = require('../Controller/usersController.js');
+const imageController = require('../Controller/imageController.js');
+const multer = require('multer');
 
 // GET Method
 
@@ -15,10 +17,27 @@ router.post("/v1/user", userController.createUser);
 
 // GET Method (With Authentication)
 
-router.get("/v1/user/self", baseAuthentication() , userController.getUser);
+router.get("/v1/user/self", baseAuthentication(), userController.getUser);
 
 // PUT Method
 
-router.put("/v1/user/self", baseAuthentication() , userController.updateUser);
+router.put("/v1/user/self", baseAuthentication(), userController.updateUser);
 
-module.exports = router; 
+// Post Method for Picture
+
+
+const upload = multer({
+    dest: 'uploads/'
+})
+
+router.post("/v1/user/self/pic", baseAuthentication(), upload.single('file'), imageController.updateUserPic);
+
+// Get Picture
+
+router.get("/v1/user/self/pic", baseAuthentication(), imageController.getUserPic);
+
+// Delete Picture
+
+router.delete("/v1/user/self/pic", baseAuthentication(), imageController.deleteUserPic);
+
+module.exports = router;
