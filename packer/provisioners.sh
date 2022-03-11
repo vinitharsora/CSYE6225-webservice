@@ -18,3 +18,9 @@ sudo npm install -g pm2
 sleep 10
 mkdir /home/ec2-user/node-app
 chown ec2-user:ec2-user /home/ec2-user/node-app
+cd ~/webservice
+#Install pm2
+sudo npm install pm2@latest -g
+sudo pm2 startup systemd --service-name node-app
+sudo pm2 start index.js
+sudo pm2 save
