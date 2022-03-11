@@ -9,6 +9,7 @@ sleep 10
 sudo amazon-linux-extras install epel
 sleep 10
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash ~/.nvm/nvm.sh
+sleep 10
 sudo yum install -y gcc-c++ make
 sleep 10
 curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash -
