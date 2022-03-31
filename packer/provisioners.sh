@@ -17,5 +17,24 @@ sudo yum install -y nodejs
 sleep 10
 sudo npm install -g pm2
 sleep 10
-mkdir /home/ec2-user/node-app
-chown ec2-user:ec2-user /home/ec2-user/node-app
+
+# install codedeploy agent
+cd /home/ec2-user
+wget https://aws-codedeploy-us-east-1.s3.us-east-1.amazonaws.com/latest/install
+chmod +x ./install
+sudo ./install auto
+sudo service codedeploy-agent status
+sudo service codedeploy-agent start
+sudo service codedeploy-agent status
+
+ls
+cd /tmp/
+echo "$(pwd)"
+ls
+cp webservice.zip /home/ec2-user/
+cd /home/ec2-user/
+unzip -q webservice.zip
+ls -ltr
+chown ec2-user:ec2-user /home/ec2-user/webservice
+cd webservice 
+ls -ltr 
