@@ -3,7 +3,4 @@
 #start app
 cd /home/ec2-user/webservice
 pm2 kill
-sudo pm2 start index.js
-sudo pm2 save
-sudo pm2 startup systemd
-sudo pm2 restart all --update-env
+sudo pm2 start index.js -f
