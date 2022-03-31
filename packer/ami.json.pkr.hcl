@@ -45,6 +45,10 @@ variable "subnet_id" {
   default = "subnet-06aa189b0e9d7ec2a"
 }
 
+variable "GITHUB_PATH" {
+  default = env("GITHUB_REPO_PATH")
+}
+
 # "timestamp" template function replacement
 locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 
