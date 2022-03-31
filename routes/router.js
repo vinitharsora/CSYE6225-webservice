@@ -6,22 +6,22 @@ const multer = require('multer');
 
 // GET Method
 
-router.get("/healthz", (req, res) => {
+router.get("/health", (req, res) => {
     console.log("Is it hitting?")
     res.sendStatus(200).json();
 });
 
 // POST Method
 
-router.post("/v1/user", userController.createUser);
+router.post("/v2/user", userController.createUser);
 
 // GET Method (With Authentication)
 
-router.get("/v1/user/self", baseAuthentication(), userController.getUser);
+router.get("/v2/user/self", baseAuthentication(), userController.getUser);
 
 // PUT Method
 
-router.put("/v1/user/self", baseAuthentication(), userController.updateUser);
+router.put("/v2/user/self", baseAuthentication(), userController.updateUser);
 
 // Post Method for Picture
 
@@ -30,14 +30,14 @@ const upload = multer({
     dest: 'uploads/'
 })
 
-router.post("/v1/user/self/pic", baseAuthentication(), upload.single('file'), imageController.updateUserPic);
+router.post("/v2/user/self/pic", baseAuthentication(), upload.single('file'), imageController.updateUserPic);
 
 // Get Picture
 
-router.get("/v1/user/self/pic", baseAuthentication(), imageController.getUserPic);
+router.get("/v2/user/self/pic", baseAuthentication(), imageController.getUserPic);
 
 // Delete Picture
 
-router.delete("/v1/user/self/pic", baseAuthentication(), imageController.deleteUserPic);
+router.delete("/v2/user/self/pic", baseAuthentication(), imageController.deleteUserPic);
 
 module.exports = router;
