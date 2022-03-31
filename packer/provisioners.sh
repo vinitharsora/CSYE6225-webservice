@@ -4,6 +4,8 @@ sleep 30
 
 sudo yum update -y
 sleep 10
+sudo yum install ruby wget unzip -y
+sleep 10
 sudo yum install git make gcc -y
 sleep 10
 sudo amazon-linux-extras install epel
