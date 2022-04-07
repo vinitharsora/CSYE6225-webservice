@@ -11,23 +11,23 @@ function baseAuthentication() {
         const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
         const [username, password] = credentials.split(':');
         var isValid;
-        await getUserByUsername(username, password).then(async (res) => {
-            if (!res) {
+        await getUserByUsername(username, password).then(async (result) => {
+            if (!result) {
                 return res.status(401).json({
                     message: 'Invalid Authentication Credentials'
                 });
+            }else{
+                isValid = await comparePasswords(password, result.dataValues.password);
+                if (!isValid) {
+                    return res.status(401).json({
+                        message: 'Invalid Authentication Credentials'
+                    });
+                } else {
+                    req.user = {username: username, password: password};
+                    next();
+                }
             }
-            isValid = await comparePasswords(password, res.dataValues.password);
         });
-
-        if (!isValid) {
-            return res.status(401).json({
-                message: 'Invalid Authentication Credentials'
-            });
-        } else {
-            req.user = {username: username, password: password};
-            next();
-        }
     }];
 }
 
