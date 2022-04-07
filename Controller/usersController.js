@@ -6,6 +6,7 @@ const {
 } = require('uuid');
 const logger = require("../config/logger");
 const SDC = require('statsd-client');
+const dbConfig = require('../config/configDB.js');
 const sdc = new SDC({host: dbConfig.METRICS_HOSTNAME, port: dbConfig.METRICS_PORT});
 
 // Create a User
