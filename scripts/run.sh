@@ -9,6 +9,7 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
 
 #start app
 cd /home/ec2-user/webservice
+sudo rm -rf webapp.service
 pm2 kill
 sudo npm i
 sleep 30
