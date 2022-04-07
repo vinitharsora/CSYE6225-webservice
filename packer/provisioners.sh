@@ -52,8 +52,9 @@ chown ec2-user:ec2-user /home/ec2-user/webservice
 cd webservice 
 ls -ltr 
 
+sudo npm i
+sleep 30
 sudo pm2 start index.js
 sudo pm2 save
 sudo pm2 startup systemd
-sudo pm2 list
 sudo pm2 restart all --update-env
