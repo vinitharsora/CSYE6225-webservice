@@ -2,6 +2,7 @@
 
 #start app
 cd /home/ec2-user/webservice
+sudo rm -rf webapp.service
 sudo npm i
 sleep 30
 sudo pm2 start index.js

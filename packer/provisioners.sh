@@ -49,7 +49,8 @@ cd /home/ec2-user/
 unzip -q webservice.zip
 ls -ltr
 chown ec2-user:ec2-user /home/ec2-user/webservice
-cd webservice 
+cd webservice
+sudo rm -rf webapp.service 
 ls -ltr 
 
 sudo npm i
