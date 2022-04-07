@@ -33,7 +33,7 @@ jobs:
           echo $GITHUB_PATH
 
       # build ami
-      # - name: Build Artifact
+      - name: Build Artifact
         uses: hashicorp/packer-github-actions@master
         with:
           command: build
