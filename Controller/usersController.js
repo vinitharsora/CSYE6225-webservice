@@ -5,6 +5,8 @@ const {
     v4: uuidv4
 } = require('uuid');
 const logger = require("../config/logger");
+const SDC = require('statsd-client');
+const sdc = new SDC({host: dbConfig.METRICS_HOSTNAME, port: dbConfig.METRICS_PORT});
 
 // Create a User
 
@@ -42,6 +44,7 @@ async function createUser(req, res, next) {
 
         User.create(user).then(data => {
             logger.info("/create user 201");
+            sdc.increment('endpoint.createuser');
                 res.status(201).send({
                     id: data.id,
                     first_name: data.first_name,
@@ -105,6 +108,7 @@ async function updateUser(req, res, next) {
     }).then((result) => {
         if (result == 1) {
             logger.info("update user 204");
+            sdc.increment('endpoint.updateuser');
             res.sendStatus(204);
         } else {
             res.sendStatus(400);
