@@ -53,7 +53,7 @@ async function createUser(req, res, next) {
         };
 
         User.create(user).then(udata => {
-                let link = ' http://demo.domain.tld/v1/verifyUserEmail?email=' + data.id + '&token=' + uuidv4();
+                let link = ' http://demo.vinitharsora.me/v1/verifyUserEmail?email=' + udata.id + '&token=' + uuidv4();
                 const data_link = {
                     email: udata.id,
                     link: link
