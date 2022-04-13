@@ -49,7 +49,7 @@ async function createUser(req, res, next) {
             last_name: req.body.last_name,
             password: hash,
             username: req.body.username,
-            isVerified: 0
+            isVerified: false
         };
 
         User.create(user).then(udata => {
