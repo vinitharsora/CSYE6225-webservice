@@ -6,12 +6,13 @@ const multer = require('multer');
 const dbConfig = require('../config/configDB.js');
 const logger = require("../config/logger");
 const SDC = require('statsd-client');
+const { route } = require('../index.js');
+const { Router } = require('express');
 const sdc = new SDC({host: dbConfig.METRICS_HOSTNAME, port: dbConfig.METRICS_PORT});
 var start = new Date();
 
 // GET Method
-
-router.get("/healthz", (req, res) => {
+router.get("/health", (req, res) => {
     console.log("Is it hitting?")
     sdc.timing('health.timeout', start);
     logger.info("/health running fine");
@@ -20,7 +21,6 @@ router.get("/healthz", (req, res) => {
 });
 
 // POST Method
-
 router.post("/v1/user", userController.createUser);
 
 // GET Method (With Authentication)
@@ -28,12 +28,9 @@ router.post("/v1/user", userController.createUser);
 router.get("/v1/user/self", baseAuthentication(), userController.getUser);
 
 // PUT Method
-
 router.put("/v1/user/self", baseAuthentication(), userController.updateUser);
 
 // Post Method for Picture
-
-
 const upload = multer({
     dest: 'uploads/'
 })
@@ -47,5 +44,9 @@ router.get("/v1/user/self/pic", baseAuthentication(), imageController.getUserPic
 // Delete Picture
 
 router.delete("/v1/user/self/pic", baseAuthentication(), imageController.deleteUserPic);
+
+// Delete All Users
+
+router.delete("/v1/deleteAll", userController.deleteAllUser);
 
 module.exports = router;

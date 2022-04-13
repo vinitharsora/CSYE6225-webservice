@@ -13,13 +13,27 @@ const sdc = new SDC({
 });
 const AWS = require('aws-sdk');
 AWS.config.update({
-    region: process.env.AWS_REGION
+    region: process.env.AWS_REGION || 'us-east-1'
 });
 var sns = new AWS.SNS({});
+
+// //Delete all User
+async function deleteAllUser(req, res, next){
+    // db.User.destroy({
+    //     where: {},
+    //     truncate: true
+    //   });
+    console.log('delete')
+    await User.sync({ force: true });
+    console.log('delete all')
+    res.status(201).send();
+   
+}
 
 // Create a User
 
 async function createUser(req, res, next) {
+    console.log('create userrr')
     var hash = await bcrypt.hash(req.body.password, 10);
     const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
     if (!emailRegex.test(req.body.username)) {
@@ -51,46 +65,89 @@ async function createUser(req, res, next) {
             username: req.body.username,
             isVerified: false
         };
-
-        User.create(user).then(udata => {
-                let link = ' http://demo.vinitharsora.me/v1/verifyUserEmail?email=' + udata.id + '&token=' + uuidv4();
+        console.log('above user');
+        User.create(user).then(async udata => {
+                console.log('after user');
+                let link = ' http://demo.vinitharsora.me/v1/verifyUserEmail?email=' + udata.username + '&token=' + uuidv4();
                 const data_link = {
                     email: udata.id,
                     link: link
                 }
+                const randomnanoID = uuidv4();
+                var dynamoDatabase = new AWS.DynamoDB({
+                    apiVersion: '2012-08-10',
+                    region: 'us-east-1'
+                });
+                const initialTime = Math.round(Date.now() / 1000);
+                const expiryTime = initialTime + 4 * 60;
+
+                // Create the Service interface for dynamoDB
+                var parameter = {
+                    TableName: 'csye6225',
+                    Item: {
+                        'Token': {
+                            S: randomnanoID
+                        },
+                        'TimeToLive': {
+                            N: expiryTime.toString()
+                        }
+                    }
+                };
+
+                //saving the token onto the dynamo DB
+                await dynamoDatabase.putItem(parameter).promise();
+
+                var msg ={
+                    'username': udata.username,
+                    'token': randomnanoID
+                };
+                console.log(JSON.stringify(msg));
 
                 const params = {
 
-                    Message: JSON.stringify(data_link),
-                    TopicArn: 'arn:aws:sns:us-east-1:981331903688:verify_email:01f8cc09-369a-416f-a0ae-3b332f8f80a7'
+                    Message: JSON.stringify(msg),
+                    Subject: randomnanoID,
+                    TopicArn: 'arn:aws:sns:us-east-1:981331903688:verify_email'
 
                 }
-                let publishTextPromise = SNS.publish(params).promise();
-                publishTextPromise.then(
-                    function (data) {
+                var publishTextPromise = await sns.publish(params).promise();
 
-                        console.log(`Message sent to the topic ${params.TopicArn}`);
-                        console.log("MessageID is " + data.MessageId);
-                        // res.status(204).send();
-                        logger.info("/create user 201");
-                        logger.info("Message sent to the topic ${params.TopicArn}");
-                        sdc.increment('endpoint.userCreate');
-                        res.status(201).send({
-                            id: udata.id,
-                            first_name: udata.first_name,
-                            last_name: udata.last_name,
-                            username: udata.username,
-                            account_created: udata.createdAt,
-                            account_updated: udata.updatedAt
-                        });
+                console.log('publishTextPromise', publishTextPromise);
+                res.status(201).send({
+                    id: udata.id,
+                    first_name: udata.first_name,
+                    last_name: udata.last_name,
+                    username: udata.username,
+                    account_created: udata.createdAt,
+                    account_updated: udata.updatedAt,
+                    isVerified: udata.isVerified
+                });
 
-                    }).catch(
+                // publishTextPromise.then(
+                //     function (data) {
+                //         console.log('publishTextPromise.then', data);
+                //         console.log(`Message sent to the topic ${params.TargetArn}`);
+                //         console.log("MessageID is " + data);
+                //         logger.info("/create user 201");
+                //         logger.info(`Message sent to the topic ${params.TargetArn}`);
+                //         sdc.increment('endpoint.userCreate');
+                //         res.status(201).send({
+                //             id: udata.id,
+                //             first_name: udata.first_name,
+                //             last_name: udata.last_name,
+                //             username: udata.username,
+                //             account_created: udata.createdAt,
+                //             account_updated: udata.updatedAt,
+                //             isVerified: udata.isVerified
+                //         });
 
-                    function (err) {
-                        console.error(err, err.stack);
-                        res.status(500).send(err);
+                //     }).catch(
 
-                    });
+                //     function (err) {
+                //         console.error(err, err.stack);
+                //         res.status(500).send(err);
+
+                //     });
 
             })
             .catch(err => {
@@ -100,6 +157,114 @@ async function createUser(req, res, next) {
                 });
             });
     }
+    // try {
+
+    //     if (!request.body || !request.body.username || !request.body.first_name || !request.body.last_name || !request.body.password) {
+
+    //         let response = {
+    //             statusCode: 400,
+    //             message: "Bad Request"
+    //         };
+    //         return response;
+    //     }
+
+    //     if (request.body.password) {
+    //         const encryptedPass = bcrypt.hashSync(request.body.password, 10);
+    //         request.body.password = encryptedPass;
+    //     }
+
+    //     const newUser1 = new User(request.body);
+    //     if (!emailValidator.validate(request.body.username)) {
+    //         const profileResponse = {
+    //             statusCode: 400,
+    //             message: "Bad Request"
+    //         };
+    //         return profileResponse;
+    //     }
+
+    //     let profileExists = await User.findOne({
+    //         where: {
+    //             username: request.body.username
+    //         }
+    //     })
+
+    //     if (profileExists) {
+
+    //         const profileResponse = {
+    //             statusCode: 400,
+    //             message: "Bad Request"
+    //         };
+    //         return profileResponse;
+    //     }
+
+    //     //in case of a new user
+    //     else {
+    //         const response = await newUser1.save();
+    //         //To send message to Dynamo DB
+    //         var dynamoDatabase = new AWS.DynamoDB({
+    //             apiVersion: '2012-08-10',
+    //             region: 'us-east-1'
+    //         });
+    //         const initialTime = Math.round(Date.now() / 1000);
+    //         const expiryTime = initialTime + 4 * 60;
+    //         const randomnanoID = uuidv4();
+
+    //         // Create the Service interface for dynamoDB
+    //         var parameter = {
+    //             TableName: 'myDynamoTokenTable',
+    //             Item: {
+    //                 'Token': {
+    //                     S: randomnanoID
+    //                 },
+    //                 'TimeToLive': {
+    //                     N: expiryTime.toString()
+    //                 }
+    //             }
+    //         };
+
+    //         //saving the token onto the dynamo DB
+    //         await dynamoDatabase.putItem(parameter).promise();
+
+    //         //To send message onto SNS
+    //         //var sns = new AWS.SNS({apiVersion: '2010-03-31'});
+
+    //         // Create publish parameters
+    //         var params = {
+    //             Message: response.username,
+    //             Subject: randomnanoID,
+    //             TopicArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
+
+    //         };
+
+    //         //var topicARN= 'arn:aws:sns:us-east-1:172869529067:VerifyingEmail';
+
+    //         var publishTextPromise = new AWS.SNS({
+    //             apiVersion: '2010-03-31',
+    //             region: 'us-east-1'
+    //         });
+    //         await publishTextPromise.publish(params).promise();
+
+    //         //returning response of the creating user.
+    //         const returnProfile = {
+    //             statusCode: 200,
+    //             message: {
+    //                 id: response.id,
+    //                 first_name: response.first_name,
+    //                 last_name: response.last_name,
+    //                 username: response.username,
+    //                 account_created: response.createdAt,
+    //                 account_updated: response.updatedAt
+    //             }
+    //         };
+    //         return returnProfile;
+    //     }
+    // } catch (e) {
+    //     let response1 = {
+    //         statusCode: 500,
+    //         message: e.message
+    //     };
+    //     return response1;
+    // }
 }
 
 //Get a User
@@ -177,5 +342,6 @@ module.exports = {
     getUser: getUser,
     getUserByUsername: getUserByUsername,
     comparePasswords: comparePasswords,
-    updateUser: updateUser
+    updateUser: updateUser,
+    deleteAllUser: deleteAllUser
 };
