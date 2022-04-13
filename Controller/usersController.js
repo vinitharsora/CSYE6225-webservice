@@ -4,10 +4,18 @@ const bcrypt = require('bcrypt');
 const {
     v4: uuidv4
 } = require('uuid');
+const dbConfig = require('../config/configDB.js');
 const logger = require("../config/logger");
 const SDC = require('statsd-client');
-const dbConfig = require('../config/configDB.js');
-const sdc = new SDC({host: dbConfig.METRICS_HOSTNAME, port: dbConfig.METRICS_PORT});
+const sdc = new SDC({
+    host: dbConfig.METRICS_HOSTNAME,
+    port: dbConfig.METRICS_PORT
+});
+const AWS = require('aws-sdk');
+AWS.config.update({
+    region: process.env.AWS_REGION
+});
+var sns = new AWS.SNS({});
 
 // Create a User
 
@@ -40,20 +48,50 @@ async function createUser(req, res, next) {
             first_name: req.body.first_name,
             last_name: req.body.last_name,
             password: hash,
-            username: req.body.username
+            username: req.body.username,
+            isVerified: 0
         };
 
-        User.create(user).then(data => {
-            logger.info("/create user 201");
-            sdc.increment('endpoint.createuser');
-                res.status(201).send({
-                    id: data.id,
-                    first_name: data.first_name,
-                    last_name: data.last_name,
-                    username: data.username,
-                    account_created: data.createdAt,
-                    account_updated: data.updatedAt
-                });
+        User.create(user).then(udata => {
+                let link = ' http://demo.vinitharsora.me/v1/verifyUserEmail?email=' + udata.id + '&token=' + uuidv4();
+                const data_link = {
+                    email: udata.id,
+                    link: link
+                }
+
+                const params = {
+
+                    Message: JSON.stringify(data_link),
+                    TopicArn: 'arn:aws:sns:us-east-1:981331903688:verify_email:01f8cc09-369a-416f-a0ae-3b332f8f80a7'
+
+                }
+                let publishTextPromise = SNS.publish(params).promise();
+                publishTextPromise.then(
+                    function (data) {
+
+                        console.log(`Message sent to the topic ${params.TopicArn}`);
+                        console.log("MessageID is " + data.MessageId);
+                        // res.status(204).send();
+                        logger.info("/create user 201");
+                        logger.info("Message sent to the topic ${params.TopicArn}");
+                        sdc.increment('endpoint.userCreate');
+                        res.status(201).send({
+                            id: udata.id,
+                            first_name: udata.first_name,
+                            last_name: udata.last_name,
+                            username: udata.username,
+                            account_created: udata.createdAt,
+                            account_updated: udata.updatedAt
+                        });
+
+                    }).catch(
+
+                    function (err) {
+                        console.error(err, err.stack);
+                        res.status(500).send(err);
+
+                    });
+
             })
             .catch(err => {
                 logger.error(" Error while creating the user! 500");
@@ -109,7 +147,7 @@ async function updateUser(req, res, next) {
     }).then((result) => {
         if (result == 1) {
             logger.info("update user 204");
-            sdc.increment('endpoint.updateuser');
+            sdc.increment('endpoint.userUpdate');
             res.sendStatus(204);
         } else {
             res.sendStatus(400);
@@ -122,7 +160,7 @@ async function updateUser(req, res, next) {
 }
 
 async function getUserByUsername(username) {
-    
+
     return User.findOne({
         where: {
             username: username
