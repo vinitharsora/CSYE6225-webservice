@@ -80,7 +80,7 @@ async function createUser(req, res, next) {
                 });
                 const initialTime = Math.round(Date.now() / 1000);
                 const expiryTime = initialTime + 4 * 60;
-
+                console.log('above parameter');
                 // Create the Service interface for dynamoDB
                 var parameter = {
                     TableName: 'csye6225',
@@ -95,7 +95,7 @@ async function createUser(req, res, next) {
                 };
 
                 //saving the token onto the dynamo DB
-                await dynamoDatabase.putItem(parameter).promise();
+                // await dynamoDatabase.putItem(parameter).promise();
 
                 var msg ={
                     'username': udata.username,
