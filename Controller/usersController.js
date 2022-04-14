@@ -86,7 +86,7 @@ async function createUser(req, res, next) {
 
                 // Create the Service interface for dynamoDB
                 var parameter = {
-                    TableName: 'csye-6225',
+                    TableName: 'csye6225',
                     Item: {
                         'TokenName': {
                             S: randomnanoID
@@ -150,7 +150,7 @@ async function verifyUser(req, res, next) {
     if (user) {
 
         var params = {
-            TableName: 'csye-6225',
+            TableName: 'csye6225',
             Key: {
                 'TokenName': {
                     S: req.query.token
