@@ -20,15 +20,18 @@ router.get("/healthz", (req, res) => {
     res.sendStatus(200).json();
 });
 
+
 // POST Method
 router.post("/v1/user", userController.createUser);
 
-// GET Method (With Authentication)
 
+// GET Method (With Authentication)
 router.get("/v1/user/self", baseAuthentication(), userController.getUser);
+
 
 // PUT Method
 router.put("/v1/user/self", baseAuthentication(), userController.updateUser);
+
 
 // Post Method for Picture
 const upload = multer({
@@ -37,16 +40,20 @@ const upload = multer({
 
 router.post("/v1/user/self/pic", baseAuthentication(), upload.single('file'), imageController.updateUserPic);
 
-// Get Picture
 
+// Get Picture
 router.get("/v1/user/self/pic", baseAuthentication(), imageController.getUserPic);
 
-// Delete Picture
 
+// Delete Picture
 router.delete("/v1/user/self/pic", baseAuthentication(), imageController.deleteUserPic);
 
-// Delete All Users
 
+// Delete all User from user table
 router.delete("/v1/deleteAll", userController.deleteAllUser);
+
+
+// Verify User
+router.get("/v1/user/verifyUserEmail", userController.verifyUser);
 
 module.exports = router;
