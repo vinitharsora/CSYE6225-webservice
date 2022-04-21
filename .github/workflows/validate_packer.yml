@@ -34,7 +34,7 @@ jobs:
           ls -l appDir
           echo $GITHUB_PATH
 
-      # build amis
+      # build ami
       - name: Build Artifact
         uses: hashicorp/packer-github-actions@master
         with:
